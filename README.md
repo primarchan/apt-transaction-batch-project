@@ -1,8 +1,37 @@
-#
+# 호갱노노 Batch 시스템 프로젝트
+- 국토교통부 아파트 매매 실거래가 공공 데이터 기반 Spring Batch 프로젝트
+
+## TECH-STACK
+- Java 11
+- Spring Boot 2.7.16
+- Spring Batch 2.7.16
+- Spring Data JPA 2.7.16
+- Spring Data JDBC 2.7.16
+- MySQL
+- H2 DB
+- Gradle 8.2.1
+- Lombok 1.18.30
+- JUnit5
+- IntelliJ IDEA 2022.1.4 (Ultimate Edition)
+
+## BUILD & RUN
+- 특정 Job 실행 시 Program arguments 에 Job 이름 추가
+    - `--spring.bathc.job.names=${Job 이름}`
+- JobParameter 추가
+    - `--spring.bathc.job.names=${Job 이름} -${JobParamter 이름}=${JobParameter Value}`
+- Window/Mac OS 에서 Build 한 파일이 있는 곳까지 명령프롬프트/터미널을 통해 접근해서 실행
+    - `.gradlew bootJar`
+    - `java -jar build/libs/${빌드한 파일}.jar --spring.batch.job.names=${Job 이름}`
 
 ## INFRASTRUCTURE
+### Docker
+- docker-compose.yml
+- `docker-compse up -d`
 
 ## DATABASE
+<details>
+<summary>DDL 상세보기 (클릭) </summary>
+
 ```sql
 -- 동 코드 테이블 생성
 create table lawd
@@ -56,3 +85,4 @@ create table apt_notification
     constraint uk_email_gulawdcd unique (email, gu_lawd_cd)
 );
 ```
+</details>
