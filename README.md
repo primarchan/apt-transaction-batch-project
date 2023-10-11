@@ -9,7 +9,7 @@ create table lawd
 (
   lawd_id        bigint auto_increment primary key,
   lawd_cd        char(10) not null,
-  lwd_dong      varchar(100) not null,
+  lawd_dong      varchar(100) not null,
   exist         tinyint(1) not null,
   created_at    datetime not null,
   updated_at    datetime not null,
