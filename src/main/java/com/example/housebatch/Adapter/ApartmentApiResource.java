@@ -26,9 +26,9 @@ public class ApartmentApiResource {
     @Value("${external.apartment-api.service-key}")
     private String serviceKey;
 
-    public Resource getResource(String lawdCd, YearMonth yearMonth) {
+    public Resource getResource(String guLawdCd, YearMonth yearMonth) {
         String url = String.format("%s?serviceKey=%s&LAWD_CD=%s&DEAL_YMD=%s",
-                path, serviceKey, lawdCd, yearMonth.format(DateTimeFormatter.ofPattern("yyyyMM"))
+                path, serviceKey, guLawdCd, yearMonth.format(DateTimeFormatter.ofPattern("yyyyMM"))
         );
 
         log.info("Resource URL = {}", url);
