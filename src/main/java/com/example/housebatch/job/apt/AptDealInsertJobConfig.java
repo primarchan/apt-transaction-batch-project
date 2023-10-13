@@ -14,7 +14,6 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.xml.StaxEventItemReader;
 import org.springframework.batch.item.xml.builder.StaxEventItemReaderBuilder;
@@ -26,7 +25,6 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import java.time.YearMonth;
 import java.util.Arrays;
-import java.util.List;
 
 @Slf4j
 @Configuration
@@ -38,8 +36,6 @@ public class AptDealInsertJobConfig {
     private final StepBuilderFactory stepBuilderFactory;
 
     private final ApartmentApiResource apartmentApiResource;
-
-    private final LawdRepository lawdRepository;
 
     @Bean
     public Job aptDealInsertJob(
@@ -75,49 +71,10 @@ public class AptDealInsertJobConfig {
                 .build();
     }
 
-    /**
-     * ExecutionContext 에 저장할 데이터
-     * 1. guLawdCd - 구 코드 -> 다음 Step 에서 활용할 값
-     * 2. guLawdCdList - 구 코드 리스트
-     * 3. itemCount - 남아있는 구 코드의 갯수
-     */
     @Bean
     @StepScope
-    public Tasklet guLawdCdTasklet() {
-        return (contribution, chunkContext) -> {
-            StepExecution stepExecution = chunkContext.getStepContext().getStepExecution();
-            ExecutionContext executionContext = stepExecution.getJobExecution().getExecutionContext();
-
-            /**
-             * 데이터가 존재하면 다음 스텝을 실행, 데이터가 존재하지 않으면 종료
-             * 데이터가 존재 -> CONTINUABLE
-             */
-            List<String> guLawdCdList;
-            if (!executionContext.containsKey("guLawdCdList")) {
-                guLawdCdList = lawdRepository.findDistinctGuLawdCd();
-                executionContext.put("guLawdCdList", guLawdCdList);
-                executionContext.putInt("itemCount", guLawdCdList.size());
-            } else {
-                guLawdCdList = (List<String>) executionContext.get("guLawdCdList");
-            }
-
-            Integer itemCount = executionContext.getInt("itemCount");
-
-            if (itemCount == 0) {
-                contribution.setExitStatus(ExitStatus.COMPLETED);
-                return RepeatStatus.FINISHED;
-            }
-
-            itemCount--;
-
-            String guLawdCd = guLawdCdList.get(itemCount);
-            executionContext.putString("guLawdCd", guLawdCd);
-            executionContext.putInt("itemCount", itemCount);
-
-            contribution.setExitStatus(new ExitStatus("CONTINUABLE"));
-
-            return RepeatStatus.FINISHED;
-        };
+    public Tasklet guLawdCdTasklet(LawdRepository lawdRepository) {
+        return new GuLawdTasklet(lawdRepository);
     }
 
     @Bean
