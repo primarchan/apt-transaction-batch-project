@@ -14,6 +14,19 @@
 - JUnit5
 - IntelliJ IDEA 2022.1.4 (Ultimate Edition)
 
+## REQUIREMENT
+### 동 코드 Migration Batch
+- 정의: (데이터 생성 용으로) 법정동 파일을 DB 테이블에 저장한다. 
+- 배치 주기 : 최초, 데이터가 수정 되었을 시
+- 데이터 저장 : 법정동 파일을 DB 테이블 (`lawd`) 에 저장한다.
+
+### 실거래가 수집 Batch 설계 요구사항
+- 정의 : 매일 실거래가 데이터를 가져와 DB 에 저장한다.
+- 배치 주기 : 매일 새벽 1시 (트래픽이 적은 시간)
+- Reader : 법정동 '구' 코드 (`lawdCd`) 불러오기
+- Processor : '구' 마다 현재 월에 대한 API 호출
+- Writer : 새롭게 생성된 실거래가 정보만 DB 에 Upsert (Update + Insert)
+
 ## BUILD & RUN
 - 특정 Job 실행 시 Program arguments 에 Job 이름 추가
     - `--spring.bathc.job.names=${Job 이름}`
@@ -36,52 +49,52 @@
 -- 동 코드 테이블 생성
 create table lawd
 (
-  lawd_id        bigint auto_increment primary key,
-  lawd_cd        char(10) not null,
-  lawd_dong      varchar(100) not null,
-  exist         tinyint(1) not null,
-  created_at    datetime not null,
-  updated_at    datetime not null,
+  lawd_id        bigint auto_increment primary key comment '법정동 코드 ID',
+  lawd_cd        char(10) not null comment '법정동 코드',
+  lawd_dong      varchar(100) not null comment '법정동 명',
+  exist         tinyint(1) not null comment '존폐 여부',
+  created_at    datetime not null comment '생성 일시',
+  updated_at    datetime not null comment '수정 일시',
   constraint uk_lawdcd unique (lawd_cd)
 );
 
 -- 아파트 테이블 생성
 create table apt
 (
-    apt_id      bigint auto_increment primary key,
-    apt_name    varchar(40) not null,
-    jibun       varchar(20) not null,
-    dong        varchar(40) not null,
-    gu_lawd_cd  char(5) not null,
-    built_year  int not null,
-    created_at  datetime not null,
-    updated_at  datetime not null
+    apt_id      bigint auto_increment primary key comment '아파트 ID',
+    apt_name    varchar(40) not null comment '아파트 명',
+    jibun       varchar(20) not null comment '지번 주소',
+    dong        varchar(40) not null comment '법정동',
+    gu_lawd_cd  char(5) not null comment '법정구 코드',
+    built_year  int not null comment '건축년도',
+    created_at  datetime not null comment '생성 일시',
+    updated_at  datetime not null comment '수정 일시'
 );
 
 -- 아퍄트 거래 테이블 생성
 create table apt_deal
 (
-    apt_deal_id         bigint auto_increment primary key,
-    apt_id              bigint not null,
-    exclusive_area      double not null,
-    deal_date           date not null,
-    deal_amount         bigint not null,
-    floor               int not null,
-    deal_canceled       tinyint(1) default 0 not null,
-    deal_canceled_date  date null,
-    created_at  datetime not null,
-    updated_at  datetime not null
+    apt_deal_id         bigint auto_increment primary key comment '아파트 거래 ID',
+    apt_id              bigint not null comment '아파트 ID',
+    exclusive_area      double not null comment '전용면적',
+    deal_date           date not null comment '계약 일자',
+    deal_amount         bigint not null comment '거래 금액',
+    floor               int not null comment '층',
+    deal_canceled       tinyint(1) default 0 not null comment '해제 여부',
+    deal_canceled_date  date null comment '해제 사유 발생일',
+    created_at  datetime not null comment '생성 일시',
+    updated_at  datetime not null comment '수정 일시'
 );
 
 -- 아파트 거래 알림 테이블
 create table apt_notification
 (
-    apt_notification_id bigint auto_increment primary key,
-    email               varchar(100) not null,
-    gu_lawd_cd          char(5) not null,
-    enabled             tinyint(1) not null,
-    created_at          datetime not null,
-    updated_at          datetime not null,
+    apt_notification_id bigint auto_increment primary key comment '아파트 거래 알림 ID',
+    email               varchar(100) not null comment '이메일',
+    gu_lawd_cd          char(5) not null comment '법정구 코드',
+    enabled             tinyint(1) not null comment '관심 여부',
+    created_at          datetime not null comment '생성 일시',
+    updated_at          datetime not null comment '수정 일시',
     constraint uk_email_gulawdcd unique (email, gu_lawd_cd)
 );
 ```
