@@ -1,6 +1,6 @@
 package com.example.housebatch.job.apt;
 
-import com.example.housebatch.Adapter.ApartmentApiResource;
+import com.example.housebatch.adapter.ApartmentApiResource;
 import com.example.housebatch.core.dto.AptDealDto;
 import com.example.housebatch.core.repository.LawdRepository;
 import com.example.housebatch.core.service.AptDealService;
@@ -18,7 +18,6 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.xml.StaxEventItemReader;
 import org.springframework.batch.item.xml.builder.StaxEventItemReaderBuilder;
-import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
