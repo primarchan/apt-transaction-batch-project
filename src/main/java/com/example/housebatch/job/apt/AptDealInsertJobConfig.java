@@ -3,6 +3,7 @@ package com.example.housebatch.job.apt;
 import com.example.housebatch.Adapter.ApartmentApiResource;
 import com.example.housebatch.core.dto.AptDealDto;
 import com.example.housebatch.core.repository.LawdRepository;
+import com.example.housebatch.core.service.AptDealService;
 import com.example.housebatch.job.validator.YearMonthParameterValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,14 +41,13 @@ public class AptDealInsertJobConfig {
     @Bean
     public Job aptDealInsertJob(
             Step guLawdCdStep,
-            Step contextPrintStep
-//            Step aptDealInsertStep
+            Step aptDealInsertStep
     ) {
         return jobBuilderFactory.get("aptDealInsertJob")
                 .incrementer(new RunIdIncrementer())
                 .validator(aptDealJobParameterValidator())
                 .start(guLawdCdStep)
-                .on("CONTINUABLE").to(contextPrintStep).next(guLawdCdStep)
+                .on("CONTINUABLE").to(aptDealInsertStep).next(guLawdCdStep)
                 .from(guLawdCdStep)
                 .on("*").end()
                 .end()
@@ -77,6 +77,7 @@ public class AptDealInsertJobConfig {
         return new GuLawdTasklet(lawdRepository);
     }
 
+    /*
     @Bean
     @JobScope
     public Step contextPrintStep(Tasklet contextPrintTasklet) {
@@ -95,6 +96,7 @@ public class AptDealInsertJobConfig {
             return RepeatStatus.FINISHED;
         };
     }
+     */
 
     @Bean
     @JobScope
@@ -134,9 +136,10 @@ public class AptDealInsertJobConfig {
 
     @Bean
     @StepScope
-    public ItemWriter<AptDealDto> aptDealItemWriter() {
+    public ItemWriter<AptDealDto> aptDealItemWriter(AptDealService aptDealService) {
         return items -> {
-          items.forEach(System.out::println);
+            items.forEach(aptDealService::upsert);
+            System.out.println("============== Writing Completed ==============");
         };
     }
 
